@@ -7,19 +7,22 @@
   <style>
     /* ── Colorado Succeeds brand tokens ── */
     :root {
-      --cs-navy:   #1B3A6B;
-      --cs-blue:   #2563A8;
-      --cs-orange: #F47B20;
-      --cs-gold:   #FDB913;
-      --cs-white:  #FFFFFF;
-      --cs-light:  #F0F4FA;
-      --cs-dark:   #0D1F3C;
+      --cs-dark-navy: #10191F;
+      --cs-navy:      #1B3A54;
+      --cs-blue:      #3978A5;
+      --cs-light-blue:#A7CCEC;
+      --cs-orange:    #E37646;
+      --cs-yellow:    #F8D65C;
+      --cs-gold:      #E7B14B;
+      --cs-green:     #90C6AF;
+      --cs-white:     #FFFFFF;
+      --cs-gray:      #5A6467;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--cs-navy);
+      background: var(--cs-dark-navy);
       font-family: 'Segoe UI', Arial, sans-serif;
       color: var(--cs-white);
       display: flex;
@@ -34,38 +37,30 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       margin-bottom: 20px;
     }
 
     .logo-mark {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
     }
 
-    .logo-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--cs-orange);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--cs-white);
-      letter-spacing: -1px;
+    /* SVG mountain icon sizing */
+    .logo-mountain {
+      width: 56px;
       flex-shrink: 0;
     }
 
     .logo-text {
       display: flex;
       flex-direction: column;
+      gap: 2px;
     }
 
     .logo-text .org {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
       color: var(--cs-white);
       letter-spacing: 0.3px;
@@ -77,19 +72,20 @@
     }
 
     .logo-text .tagline {
-      font-size: 11px;
-      color: #A9C0E0;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
+      font-size: 10px;
+      color: var(--cs-light-blue);
+      letter-spacing: 0.4px;
+      font-style: italic;
     }
 
     .game-title {
-      font-size: 13px;
-      color: var(--cs-gold);
+      font-size: 12px;
+      color: var(--cs-yellow);
       letter-spacing: 3px;
       text-transform: uppercase;
       font-weight: 700;
-      margin-top: 4px;
+      margin-top: 6px;
+      opacity: 0.85;
     }
 
     /* ── Score / stats bar ── */
@@ -100,7 +96,7 @@
     }
 
     .stat-box {
-      background: var(--cs-dark);
+      background: var(--cs-navy);
       border: 1px solid var(--cs-blue);
       border-radius: 8px;
       padding: 8px 22px;
@@ -110,7 +106,7 @@
 
     .stat-box .label {
       font-size: 10px;
-      color: #A9C0E0;
+      color: var(--cs-light-blue);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -125,22 +121,22 @@
     /* ── Canvas wrapper ── */
     .canvas-wrap {
       position: relative;
-      border: 3px solid var(--cs-orange);
+      border: 3px solid var(--cs-blue);
       border-radius: 6px;
       overflow: hidden;
-      box-shadow: 0 0 30px rgba(244,123,32,0.35);
+      box-shadow: 0 0 30px rgba(57,120,165,0.4);
     }
 
     canvas {
       display: block;
-      background: var(--cs-dark);
+      background: var(--cs-navy);
     }
 
     /* ── Overlay (start / game-over) ── */
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(13,31,60,0.88);
+      background: rgba(16,25,31,0.90);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -162,7 +158,7 @@
 
     .overlay p {
       font-size: 14px;
-      color: #A9C0E0;
+      color: var(--cs-light-blue);
       text-align: center;
       max-width: 260px;
       line-height: 1.5;
@@ -192,14 +188,14 @@
       transition: background 0.15s, transform 0.1s;
     }
 
-    .btn:hover  { background: #d96a10; }
+    .btn:hover  { background: #c9613a; }
     .btn:active { transform: scale(0.97); }
 
     /* ── Controls hint ── */
     .hint {
       margin-top: 14px;
       font-size: 11px;
-      color: #7A96BE;
+      color: var(--cs-gray);
       letter-spacing: 0.5px;
       text-align: center;
     }
@@ -220,8 +216,8 @@
     @media (pointer: coarse) { .dpad { display: grid; } }
 
     .dpad button {
-      background: var(--cs-blue);
-      border: none;
+      background: var(--cs-navy);
+      border: 1px solid var(--cs-blue);
       border-radius: 8px;
       color: var(--cs-white);
       font-size: 20px;
@@ -242,7 +238,7 @@
     footer {
       margin-top: 24px;
       font-size: 11px;
-      color: #4A6A9A;
+      color: var(--cs-gray);
       text-align: center;
       line-height: 1.8;
     }
@@ -252,10 +248,16 @@
 
   <header>
     <div class="logo-mark">
-      <div class="logo-icon">CS</div>
+      <!-- Colorado Succeeds mountain logo: blue peak + gold foothills -->
+      <svg class="logo-mountain" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg" aria-label="Colorado Succeeds logo">
+        <!-- Blue summit triangle -->
+        <polygon points="50,4 78,44 22,44" fill="#3978A5"/>
+        <!-- Gold mountain range -->
+        <polygon points="0,110 20,68 35,84 50,58 65,84 80,68 100,110" fill="#E7B14B"/>
+      </svg>
       <div class="logo-text">
         <div class="org">Colorado <span>Succeeds</span></div>
-        <div class="tagline">Preparing students for tomorrow</div>
+        <div class="tagline">building a strong workforce starts in our schools</div>
       </div>
     </div>
     <div class="game-title">&#9679; Snake &#9679;</div>
@@ -307,14 +309,15 @@
 
     // ── Colours (matching CSS vars) ───────────────────────────────────────────
     const C = {
-      navy:   '#1B3A6B',
-      blue:   '#2563A8',
-      orange: '#F47B20',
-      gold:   '#FDB913',
-      white:  '#FFFFFF',
-      dark:   '#0D1F3C',
-      green:  '#4CAF82',
-      red:    '#E55454',
+      darkNavy: '#10191F',
+      navy:     '#1B3A54',
+      blue:     '#3978A5',
+      lightBlue:'#A7CCEC',
+      orange:   '#E37646',
+      yellow:   '#F8D65C',
+      gold:     '#E7B14B',
+      green:    '#90C6AF',
+      white:    '#FFFFFF',
     };
 
     // ── Game constants ────────────────────────────────────────────────────────
@@ -415,11 +418,11 @@
     // ── Drawing ───────────────────────────────────────────────────────────────
     function draw() {
       // Clear
-      ctx.fillStyle = C.dark;
+      ctx.fillStyle = C.navy;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Grid dots (subtle)
-      ctx.fillStyle = 'rgba(37,99,168,0.18)';
+      ctx.fillStyle = 'rgba(57,120,165,0.2)';
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           ctx.fillRect(c * CELL + CELL / 2 - 1, r * CELL + CELL / 2 - 1, 2, 2);
@@ -432,7 +435,7 @@
       // Snake body
       snake.forEach((seg, i) => {
         const t = i / snake.length;
-        // Gradient from gold (head) → blue (tail)
+        // Gradient from orange (head) → blue (tail)
         ctx.fillStyle = lerpColor(C.orange, C.blue, t);
         const pad = i === 0 ? 1 : 2;
         roundRect(
@@ -496,7 +499,7 @@
         ctx.beginPath();
         ctx.arc(hx + e.x * CELL, hy + e.y * CELL, 2.8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = C.dark;
+        ctx.fillStyle = C.darkNavy;
         ctx.beginPath();
         ctx.arc(hx + e.x * CELL + dir.x * 0.8, hy + e.y * CELL + dir.y * 0.8, 1.4, 0, Math.PI * 2);
         ctx.fill();
@@ -595,9 +598,9 @@
 
     // ── Initial render ────────────────────────────────────────────────────────
     (function initialDraw() {
-      ctx.fillStyle = C.dark;
+      ctx.fillStyle = C.navy;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(37,99,168,0.18)';
+      ctx.fillStyle = 'rgba(57,120,165,0.2)';
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           ctx.fillRect(c * CELL + CELL / 2 - 1, r * CELL + CELL / 2 - 1, 2, 2);
