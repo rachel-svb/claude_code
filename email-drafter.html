@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mailcraft — Draft in your voice</title>
+  <style>
+    :root {
+      --p50: #faf5ff;
+      --p100: #f3e8ff;
+      --p200: #e9d5ff;
+      --p300: #d8b4fe;
+      --p400: #c084fc;
+      --p500: #a855f7;
+      --p600: #9333ea;
+      --p700: #7e22ce;
+      --p800: #6b21a8;
+      --text: #1c1033;
+      --text-mid: #4c3d6e;
+      --text-light: #8b7aac;
+      --border: #e4d5f5;
+      --bg: #faf8ff;
+      --white: #ffffff;
+      --radius: 14px;
+      --radius-sm: 9px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0.875rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: var(--p700);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .logo-dot { color: var(--p400); }
+
+    .api-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .api-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+    .api-input {
+      padding: 0.45rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      width: 260px;
+      background: var(--p50);
+      color: var(--text);
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    .api-input:focus {
+      outline: none;
+      border-color: var(--p400);
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.12);
+      background: var(--white);
+    }
+
+    /* ── Layout ── */
+    .main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 2.25rem;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--p800);
+      letter-spacing: -0.5px;
+      margin-bottom: 0.4rem;
+    }
+    .hero p {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.625rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 6px rgba(120,60,200,0.06);
+    }
+
+    .step-label {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--p400);
+      margin-bottom: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .step-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Option grid ── */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.625rem;
+    }
+
+    .option-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      background: var(--white);
+      display: block;
+      user-select: none;
+    }
+    .option-card:hover {
+      border-color: var(--p300);
+      background: var(--p50);
+    }
+    .option-card.selected {
+      border-color: var(--p500);
+      background: var(--p50);
+      box-shadow: 0 0 0 1px var(--p500);
+    }
+    .option-card input[type="radio"] { display: none; }
+
+    .opt-icon {
+      font-size: 1.375rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      line-height: 1;
+    }
+    .opt-name {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .opt-desc {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      line-height: 1.4;
+    }
+    .option-card.selected .opt-name { color: var(--p700); }
+
+    /* ── Textarea ── */
+    .content-area {
+      width: 100%;
+      min-height: 148px;
+      padding: 0.875rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text);
+      resize: vertical;
+      line-height: 1.65;
+      background: var(--p50);
+      transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .content-area:focus {
+      outline: none;
+      border-color: var(--p400);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.1);
+    }
+    .content-hint {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      min-height: 1.2em;
+    }
+
+    /* ── Generate button ── */
+    .gen-btn {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, var(--p700) 0%, var(--p500) 100%);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.01em;
+      margin-top: 0.25rem;
+    }
+    .gen-btn:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(147,51,234,0.28);
+    }
+    .gen-btn:active:not(:disabled) { transform: translateY(0); }
+    .gen-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Error ── */
+    .error-msg {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: var(--radius-sm);
+      color: #991b1b;
+      font-size: 0.875rem;
+    }
+
+    /* ── Output section ── */
+    .output-section {
+      display: none;
+      margin-top: 1.75rem;
+    }
+    .output-section.visible { display: block; }
+
+    .output-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.875rem;
+    }
+    .output-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--p800);
+    }
+    .output-actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .btn {
+      padding: 0.375rem 0.875rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text-mid);
+    }
+    .btn:hover { border-color: var(--p300); color: var(--p700); }
+    .btn.primary { background: var(--p600); color: var(--white); border-color: var(--p600); }
+    .btn.primary:hover { background: var(--p700); border-color: var(--p700); }
+
+    /* ── Subject row ── */
+    .subject-row {
+      display: none;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      background: linear-gradient(135deg, var(--p50), var(--p100));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.625rem;
+    }
+    .subject-row.visible { display: flex; }
+    .subject-lbl {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--p500);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .subject-val {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* ── Email body output ── */
+    .email-body {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      font-size: 0.9375rem;
+      line-height: 1.8;
+      color: var(--text);
+      min-height: 180px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    .email-body:focus {
+      border-color: var(--p300);
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.08);
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      padding: 2rem 1.5rem;
+    }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--p200);
+      border-top-color: var(--p500);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Highlights ── */
+    mark.h-emdash   { background: #fee2e2; color: #991b1b; border-radius: 3px; padding: 0 2px; }
+    mark.h-buzzword { background: #ffedd5; color: #9a3412; border-radius: 3px; padding: 0 2px; }
+    mark.h-opener   { background: #fef9c3; color: #854d0e; border-radius: 3px; padding: 0 2px; }
+    mark.h-stiff    { background: #dbeafe; color: #1e40af; border-radius: 3px; padding: 0 2px; }
+
+    /* ── Issues panel ── */
+    .issues-panel { margin-top: 0.875rem; }
+
+    .no-issues {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      color: #15803d;
+    }
+
+    .issues-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .issues-head {
+      background: var(--p50);
+      padding: 0.625rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--p600);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .issues-legend {
+      margin-left: auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-light);
+    }
+    .leg-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .leg-dot.emdash   { background: #f87171; }
+    .leg-dot.buzzword { background: #fb923c; }
+    .leg-dot.opener   { background: #facc15; }
+    .leg-dot.stiff    { background: #60a5fa; }
+
+    .issue-item {
+      padding: 0.575rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+    .issue-item:last-child { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 99px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .badge.emdash   { background: #fee2e2; color: #991b1b; }
+    .badge.buzzword { background: #ffedd5; color: #9a3412; }
+    .badge.opener   { background: #fef9c3; color: #854d0e; }
+    .badge.stiff    { background: #dbeafe; color: #1e40af; }
+
+    .issue-text { color: var(--text-mid); }
+
+    /* ── Editable tip ── */
+    .edit-tip {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.375rem;
+    }
+    .edit-tip svg { flex-shrink: 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .options-grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: stretch; padding: 0.875rem 1rem; }
+      .api-input { width: 100%; }
+      .api-wrap { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .main { padding: 1.5rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect width="18" height="18" rx="5" fill="#9333ea"/>
+      <path d="M5 6.5h8M5 9h6M5 11.5h7" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    mail<span class="logo-dot">craft</span>
+  </div>
+  <div class="api-wrap">
+    <span class="api-label">Anthropic API key</span>
+    <input class="api-input" type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+  </div>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <h1>Draft in your voice.</h1>
+    <p>Strategic communications — written the way you actually write.</p>
+  </div>
+
+  <!-- Step 1: Audience -->
+  <div class="card">
+    <div class="step-label">Step 1 &nbsp; Who are you writing to?</div>
+    <div class="options-grid" id="audienceGrid">
+
+      <label class="option-card" data-value="partner">
+        <input type="radio" name="audience" value="partner">
+        <span class="opt-icon">🤝</span>
+        <div class="opt-name">Partner / Org</div>
+        <div class="opt-desc">External partners, organizations, or stakeholders</div>
+      </label>
+
+      <label class="option-card" data-value="internal">
+        <input type="radio" name="audience" value="internal">
+        <span class="opt-icon">💬</span>
+        <div class="opt-name">Internal Team</div>
+        <div class="opt-desc">Colleagues, staff, or team members</div>
+      </label>
+
+      <label class="option-card" data-value="ptsa">
+        <input type="radio" name="audience" value="ptsa">
+        <span class="opt-icon">🏫</span>
+        <div class="opt-name">PTSA / School</div>
+        <div class="opt-desc">Parents, families, and school community</div>
+      </label>
+
+    </div>
+  </div>
+
+  <!-- Step 2: Input type -->
+  <div class="card">
+    <div class="step-label">Step 2 &nbsp; How do you want to start?</div>
+    <div class="options-grid" id="inputTypeGrid">
+
+      <label class="option-card" data-value="bullets">
+        <input type="radio" name="inputType" value="bullets">
+        <span class="opt-icon">•••</span>
+        <div class="opt-name">Bullet Points</div>
+        <div class="opt-desc">Drop in the key points you need to cover</div>
+      </label>
+
+      <label class="option-card" data-value="topic">
+        <input type="radio" name="inputType" value="topic">
+        <span class="opt-icon">💡</span>
+        <div class="opt-name">Just a Topic</div>
+        <div class="opt-desc">Give me a topic — I'll build the structure</div>
+      </label>
+
+      <label class="option-card" data-value="draft">
+        <input type="radio" name="inputType" value="draft">
+        <span class="opt-icon">✏️</span>
+        <div class="opt-name">Rough Draft</div>
+        <div class="opt-desc">Paste what you have and I'll tighten it up</div>
+      </label>
+
+    </div>
+  </div>
+
+  <!-- Step 3: Content -->
+  <div class="card">
+    <div class="step-label">Step 3 &nbsp; Your content</div>
+    <textarea class="content-area" id="userInput" placeholder="Select your options above to get started…"></textarea>
+    <div class="content-hint" id="contentHint"></div>
+  </div>
+
+  <button class="gen-btn" id="generateBtn">Generate Email</button>
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Output -->
+  <div class="output-section" id="outputSection">
+
+    <div class="output-bar">
+      <div class="output-title">Your draft</div>
+      <div class="output-actions">
+        <button class="btn" id="regenBtn">Regenerate</button>
+        <button class="btn primary" id="copyBtn">Copy</button>
+      </div>
+    </div>
+
+    <div class="subject-row" id="subjectRow">
+      <span class="subject-lbl">Subject</span>
+      <span class="subject-val" id="subjectVal"></span>
+    </div>
+
+    <div class="email-body" id="emailBody" contenteditable="true" spellcheck="true"></div>
+
+    <div class="edit-tip">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5Z" stroke="#8b7aac" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      Click the draft above to edit directly
+    </div>
+
+    <div class="issues-panel" id="issuesPanel"></div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let selectedAudience = null;
+let selectedInputType = null;
+let lastRawText = '';
+
+// ── API key persistence ────────────────────────────────────────────────────
+const $apiKey = document.getElementById('apiKey');
+const saved = localStorage.getItem('mc_api_key');
+if (saved) $apiKey.value = saved;
+$apiKey.addEventListener('input', () => {
+  localStorage.setItem('mc_api_key', $apiKey.value.trim());
+});
+
+// ── Option card handling ───────────────────────────────────────────────────
+function setupGrid(gridId, onSelect) {
+  document.getElementById(gridId).querySelectorAll('.option-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.getElementById(gridId).querySelectorAll('.option-card')
+        .forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector('input').checked = true;
+      onSelect(card.dataset.value);
+    });
+  });
+}
+
+setupGrid('audienceGrid', val => { selectedAudience = val; });
+setupGrid('inputTypeGrid', val => {
+  selectedInputType = val;
+  updateHint(val);
+});
+
+function updateHint(type) {
+  const hints = {
+    bullets:
+      '- We\'re launching a new after-school program in March\n- Need volunteers for setup\n- Kick-off meeting Feb 15 — RSVP by Feb 10',
+    topic:  'Spring fundraiser volunteer recruitment',
+    draft:
+      'Hey everyone, so we\'re doing this thing where we need people to help out and it would be great if you could...',
+  };
+  const notes = {
+    bullets: 'List the key points in any order. Don\'t worry about phrasing.',
+    topic:   'Just the subject. The AI will build context, purpose, and next steps.',
+    draft:   'Paste your rough version. It will be tightened while keeping your intent.',
+  };
+  document.getElementById('userInput').placeholder = hints[type] || 'What do you need to say?';
+  document.getElementById('contentHint').textContent = notes[type] || '';
+}
+
+// ── Style rules ────────────────────────────────────────────────────────────
+const BUZZWORDS = [
+  'leverage', 'synergy', 'robust', 'impactful', 'utilize', 'holistic',
+  'ecosystem', 'scalable', 'innovative', 'disruptive', 'paradigm',
+  'bandwidth', 'deep dive', 'low-hanging fruit', 'best-in-class',
+  'cutting-edge', 'value-add', 'actionable', 'ideate', 'socialize',
+];
+const GENERIC_OPENERS = [
+  'i hope this message finds you well',
+  'i hope this email finds you well',
+  "i hope you're doing well",
+  'i trust this email finds you',
+  'i hope this finds you',
+  'i wanted to reach out',
+  'i am reaching out to',
+];
+const STIFF_PHRASES = [
+  "please don't hesitate",
+  'do not hesitate to contact',
+  'at your earliest convenience',
+  'should you have any questions',
+  'please feel free to',
+  'as per our conversation',
+  'as discussed',
+  'per our last',
+  'kindly note',
+  'therein',
+  'going forward',
+  'moving forward',
+  'circle back',
+  'touch base',
+];
+
+function checkStyle(text) {
+  const lower = text.toLowerCase();
+  const issues = [];
+
+  // Em dashes
+  const emCount = (text.match(/—/g) || []).length;
+  if (emCount > 0)
+    issues.push({ type: 'emdash', label: 'Em dash', phrase: '—',
+      msg: `Found ${emCount} em dash${emCount > 1 ? 'es' : ''}. Replace with a comma, colon, or period.` });
+
+  // Generic openers
+  GENERIC_OPENERS.forEach(p => {
+    if (lower.includes(p))
+      issues.push({ type: 'opener', label: 'Generic opener', phrase: p,
+        msg: `"${p}" — skip the pleasantry. Start with what matters.` });
+  });
+
+  // Buzzwords
+  BUZZWORDS.forEach(w => {
+    const re = new RegExp('\\b' + w.replace(/-/g,'[- ]') + '\\b', 'i');
+    if (re.test(text))
+      issues.push({ type: 'buzzword', label: 'Buzzword', phrase: w,
+        msg: `"${w}" — be specific. What does this actually mean here?` });
+  });
+
+  // Stiff phrases
+  STIFF_PHRASES.forEach(p => {
+    if (lower.includes(p))
+      issues.push({ type: 'stiff', label: 'Stiff phrase', phrase: p,
+        msg: `"${p}" — too formal. Say it more naturally.` });
+  });
+
+  return issues;
+}
+
+// ── HTML builder with highlights ───────────────────────────────────────────
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildHtml(text, issues) {
+  if (!issues.length) return esc(text).replace(/\n/g, '<br>');
+
+  const classMap = { emdash:'h-emdash', buzzword:'h-buzzword', opener:'h-opener', stiff:'h-stiff' };
+  let ranges = [];
+
+  issues.forEach(issue => {
+    const pattern = issue.type === 'buzzword'
+      ? '\\b' + issue.phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/-/g,'[- ]') + '\\b'
+      : issue.phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re = new RegExp(pattern, 'gi');
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      ranges.push({ start: m.index, end: m.index + m[0].length, type: issue.type, matched: m[0] });
+    }
+  });
+
+  ranges.sort((a, b) => a.start - b.start);
+  const deduped = [];
+  let lastEnd = 0;
+  for (const r of ranges) {
+    if (r.start >= lastEnd) { deduped.push(r); lastEnd = r.end; }
+  }
+
+  let html = '';
+  let pos = 0;
+  for (const r of deduped) {
+    html += esc(text.slice(pos, r.start)).replace(/\n/g,'<br>');
+    html += `<mark class="${classMap[r.type]}">${esc(r.matched)}</mark>`;
+    pos = r.end;
+  }
+  html += esc(text.slice(pos)).replace(/\n/g,'<br>');
+  return html;
+}
+
+// ── Issues panel ───────────────────────────────────────────────────────────
+function renderIssues(issues) {
+  const panel = document.getElementById('issuesPanel');
+  if (!issues.length) {
+    panel.innerHTML = '<div class="no-issues"><span>✓</span><span>No style issues detected. Clean draft.</span></div>';
+    return;
+  }
+  panel.innerHTML = `
+    <div class="issues-wrap">
+      <div class="issues-head">
+        Style flags — ${issues.length} item${issues.length !== 1 ? 's' : ''} to review
+        <div class="issues-legend">
+          <div class="leg"><div class="leg-dot emdash"></div>Em dash</div>
+          <div class="leg"><div class="leg-dot opener"></div>Generic opener</div>
+          <div class="leg"><div class="leg-dot buzzword"></div>Buzzword</div>
+          <div class="leg"><div class="leg-dot stiff"></div>Stiff phrase</div>
+        </div>
+      </div>
+      ${issues.map(i => `
+        <div class="issue-item">
+          <span class="badge ${i.type}">${i.label}</span>
+          <span class="issue-text">${esc(i.msg)}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Prompts ────────────────────────────────────────────────────────────────
+function systemPrompt(audience) {
+  const tones = {
+    partner: 'You are writing to an external partner or organization. Tone: warm and strategic. Be collegial and purposeful — you share mutual goals and a working relationship worth cultivating.',
+    internal: 'You are writing to your internal team or colleagues. Tone: direct and efficient. Get to the point. Be human but don\'t waste their time. Assume shared context.',
+    ptsa: 'You are writing to a PTSA or school community — parents, families, community members. Tone: friendly and accessible. No insider language. Make it easy for busy people to understand and act.',
+  };
+
+  return `You are a strategic communications expert helping draft emails in a specific voice and style. Follow every rule below without exception.
+
+WRITING RULES — non-negotiable:
+• Clear, direct language. No jargon.
+• Concise but complete. No over-explaining.
+• Structure: context → purpose → action.
+• Warm and human. Never corporate or robotic.
+• NEVER use em dashes (—). Use commas, colons, or periods instead.
+• NEVER use: leverage, synergy, robust, impactful, utilize, holistic, ecosystem, scalable, innovative, disruptive, paradigm, bandwidth, value-add, actionable, ideate.
+• NEVER open with "I hope this message finds you well," "I wanted to reach out," or similar pleasantries. Start with what matters.
+• Avoid: "please don't hesitate," "at your earliest convenience," "as per," "kindly," "going forward," "circle back," "touch base."
+• No overly polished or AI-sounding phrasing. Write like a real, thoughtful person.
+• No em dashes. Not a single one.
+
+AUDIENCE:
+${tones[audience]}
+
+OUTPUT FORMAT — return exactly this structure:
+SUBJECT: [a concise, specific subject line]
+---
+[email body only]`;
+}
+
+function userPrompt(inputType, content) {
+  const map = {
+    bullets: `Write an email based on these bullet points. Organize them into a clear, purposeful message:\n\n${content}`,
+    topic: `Write a complete email about this topic. Build out context, purpose, and a clear call to action:\n\n${content}`,
+    draft: `Rewrite and sharpen this rough draft. Keep the intent and key information, but cut anything stiff or corporate, tighten the language, and make it flow:\n\n${content}`,
+  };
+  return map[inputType];
+}
+
+// ── Generate ───────────────────────────────────────────────────────────────
+async function generate() {
+  const key = $apiKey.value.trim();
+  const content = document.getElementById('userInput').value.trim();
+  const errEl = document.getElementById('errorMsg');
+
+  const fail = msg => {
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  };
+
+  errEl.style.display = 'none';
+
+  if (!key)              return fail('Enter your Anthropic API key above.');
+  if (!selectedAudience) return fail('Select an audience type (Step 1).');
+  if (!selectedInputType) return fail('Select an input type (Step 2).');
+  if (!content)          return fail('Enter your content in Step 3.');
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  const out = document.getElementById('outputSection');
+  out.classList.add('visible');
+  document.getElementById('emailBody').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Drafting your email…</div>';
+  document.getElementById('issuesPanel').innerHTML = '';
+  document.getElementById('subjectRow').classList.remove('visible');
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 1200,
+        system: systemPrompt(selectedAudience),
+        messages: [{ role: 'user', content: userPrompt(selectedInputType, content) }],
+      }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const raw = data.content?.[0]?.text || '';
+
+    // Parse subject + body
+    let subject = '';
+    let body = raw.trim();
+    const subMatch = raw.match(/^SUBJECT:\s*(.+?)(?:\r?\n|$)/i);
+    if (subMatch) {
+      subject = subMatch[1].trim();
+      body = raw.replace(/^SUBJECT:\s*.+?\r?\n[-–—]+\r?\n?/i, '').trim();
+    }
+
+    lastRawText = body;
+
+    // Subject line
+    if (subject) {
+      document.getElementById('subjectVal').textContent = subject;
+      document.getElementById('subjectRow').classList.add('visible');
+    }
+
+    // Style check + render
+    const issues = checkStyle(body);
+    document.getElementById('emailBody').innerHTML = buildHtml(body, issues);
+    renderIssues(issues);
+
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (e) {
+    document.getElementById('emailBody').innerHTML = '';
+    fail(e.message || 'Something went wrong. Check your API key and try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generate Email';
+  }
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────
+document.getElementById('generateBtn').addEventListener('click', generate);
+document.getElementById('regenBtn').addEventListener('click', generate);
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const subject = document.getElementById('subjectVal').textContent;
+  const body = document.getElementById('emailBody').innerText;
+  const full = subject ? `Subject: ${subject}\n\n${body}` : body;
+  navigator.clipboard.writeText(full).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+});
+</script>
+
+</body>
+</html>
